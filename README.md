@@ -520,3 +520,56 @@ Here is my to-do list containing a few enhancements I am planning in adding. The
 - Improve performance [#144](https://github.com/flixlix/power-flow-card-plus/issues/144)
 
 I am still just one person working on this project and obviously have other things going on in my life, so feel free to contribute to the project. You can also feel free to create a PR with a new feature and I'll try my best to review it 😊
+
+# Läs­guide: Power Flow Card Plus v0.3.7
+
+Den inklistrade filen är den kompilerade versionen av ett Home Assistant-kort. Den innehåller både kortets egen kod och inbäddade tredjepartsbibliotek. Vid kompileringen har korta variabelnamn (`e`, `t`, `fa`) ersatt ursprungliga namn och flera filer slagits ihop. Därför är den formaterade filen bara delvis läsbar.
+
+Mappen `kallkod-v0.3.7` innehåller den mänskligt skrivna TypeScript-källkoden för samma utgåvenummer. Här har klasser, metoder och typer sina beskrivande originalnamn.
+
+## Var du ska börja
+
+1. `kallkod-v0.3.7/power-flow-card-plus.ts` är själva kortet.
+2. Läs `setConfig` (rad 138) för validering av konfigurationen.
+3. Läs `render` (rad 356) för strukturen som ritar energi­flödena.
+4. Läs `_computeRenderData` (rad 554) för beräkningen av flöden mellan nät, sol, batteri och hem.
+5. Läs `_tryConnectAll` (rad 1064) för SVG-linjerna som kopplar ihop delarna visuellt.
+
+## Huvudflödet i programmet
+
+```text
+Home Assistant skickar hass + konfiguration
+                |
+                v
+         willUpdate()
+                |
+                v
+     _computeRenderData()
+       |     |      |      |
+      nät   sol  batteri  hem/enskilda enheter
+                |
+                v
+            render()
+                |
+                v
+  SVG-linjer, etiketter, värden och animationer
+```
+
+## De viktigaste delarna
+
+| Fil eller metod | Ansvar |
+| --- | --- |
+| `PowerFlowCardPlus` | Web component som registreras som `power-flow-card-plus`. |
+| `setConfig` | Säkerställer att minst nät, sol eller batteri är konfigurerat och avvisar äldre `individual1`/`individual2`-format. |
+| `onEntityClick`, `onEntityDoubleClick` och `onEntityPointerDown` | Hanterar klick, dubbelklick och långt tryck på elementen. |
+| `render` | Skapar kortets HTML/SVG med Lit. |
+| `_computeRenderData` | Läser Home Assistant-entiteter, räknar fördelning av effekt och väljer vilka delar som visas. |
+| `ui-editor/ui-editor.ts` | Inställningsdialogen i Home Assistant. |
+| `ui-editor/schema/_schema-all.ts` | Fälten och valideringsschemat för inställningsdialogen. |
+
+## Om den formaterade JavaScript-filen
+
+`lasbar.js` är användbar för att kontrollera exakt vad den inskickade filen gör vid körning. Hoppa över följande delar vid vanlig förståelse: Lit-ramverket i början och `Sortable`-biblioteket mot slutet. De är medpackade beroenden, inte kortets affärslogik.
+
+För ändringar är TypeScript-källan mycket säkrare att läsa och ändra än den komprimerade `.js`-filen. Den hämtades från projektets officiella monorepo och har paketversion `0.3.7`, samma versionsnummer som den inskickade bundle-filen.
+
